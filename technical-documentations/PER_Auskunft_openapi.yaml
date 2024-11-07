@@ -1,0 +1,1314 @@
+openapi: 3.0.1
+info:
+  title: PER Auskunft API-GW OpenAPI Definition
+  version: v1
+paths:
+  /auskunft/tenants:
+    get:
+      summary: "Query all the tenants this user has access to"
+      description: "Returns all the tenants (organisations) available on the instance of a certain tenant. The caller should have access rights to this tenant."
+      operationId: tenants
+      parameters:
+        - name: tenantId
+          in: query
+          description: "Id of the tenant. The user must have access rights to this tenant."
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Organisation'
+  /auskunft/natPerson/{id}:
+    get:
+      summary: "Get details of a person by id"
+      description: "(Unused) Get all the details of a Person"
+      operationId: getNaturalPersonDetail
+      parameters:
+        - name: id
+          in: path
+          description: "Internal Id of the Person requested"
+          required: true
+          schema:
+            type: string
+        - name: tenantId
+          description: "The id of the tenant on behalf of which the user performs this request. The user must have access rights to this tenant."
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PersonWithRelations'
+  /auskunft/natPerson/search:
+    post:
+      summary: "Search person by parameters"
+      description: "Searches a Person with specified Search Parameters. Only results visible to the specified tenant are returned."
+      operationId: search
+      parameters:
+        - name: tenantId
+          description: "The id of the tenant on behalf of which the user performs this request. The user must have access rights to this tenant."
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Refer to the access manual to see what combination of parameters are allowed."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SearchAttributes'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuskunftSearchResponse'
+  /auskunft/natPerson/fullTextSearch:
+    post:
+      summary: "Search all attributes of a person with a certain query"
+      description: "In contrast to /search /fullTextSearch does not limit the search to a certain attribute but allowes for queries over all attributes."
+      parameters:
+        - name: tenantId
+          description: "The id of the tenant on behalf of which the user performs this request. The user must have access rights to this tenant."
+          in: query
+          required: true
+          schema:
+            type: string
+      requestBody:
+        description: "Matching persons should have an attribute that matches \"fullTextSearch\" on the specified \"evalDate\". The search can be restriced to only active residents."
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FullTextSearchAttributes'
+        required: true
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/AuskunftSearchResponse'
+  /auskunft/permission:
+    get:
+      summary: "Queries the permissions of the user with respect to a certain tenant."
+      description: "Queries the permissions of the user with respect to a certain tenant."
+      parameters:
+        - name: tenantId
+          description: "The id of the tenant on behalf of which the user performs this request. The user must have access rights to this tenant."
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            '*/*':
+              schema:
+                $ref: '#/components/schemas/PermissionResponse'
+components:
+  schemas:
+    PersonWithRelations:
+      type: object
+      properties:
+        person:
+          $ref: '#/components/schemas/NaturalPersonPermissionExportModel'
+        mainAndOtherResidenceHouseholdMembers:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/HouseholdMember'
+        secondaryResidenceHouseholdMembers:
+          type: array
+          items:
+            type: array
+            items:
+              $ref: '#/components/schemas/HouseholdMember'
+        personStatus:
+          type: integer
+          format: int32
+        residenceInformationMasked:
+          $ref: '#/components/schemas/ResidenceInformationMasked'
+        personEvalDate:
+          type: string
+          format: date
+        hasLock:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    HouseholdMember:
+      type: object
+      properties:
+        perId:
+          type: string
+        egId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        ewId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        householdType:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        nameData:
+          $ref: '#/components/schemas/MaskedNameData'
+        dateOfBirth:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        sexCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        hasLock:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    ResidenceInformationMasked:
+      type: object
+      properties:
+        address:
+          $ref: '#/components/schemas/MaskedDwellingAddressV2'
+        reportingOrganisationCantonAbbreviation:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        reportingOrganisationName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        residences:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    NamedPersonId:
+      type: object
+      properties:
+        personIdCategory:
+          type: string
+        personId:
+          type: string
+    Organisation:
+      required:
+        - masterDataId
+      type: object
+      properties:
+        organisationCode:
+          type: string
+        secureConnectId:
+          type: string
+        municipalityId:
+          type: string
+        historyMunicipalityId:
+          type: string
+        cantonAbbreviation:
+          type: string
+        organisationName:
+          type: string
+        organisationTypeCode:
+          type: string
+          enum:
+            - GEMEINDE
+            - KANTON
+            - BUND
+            - VERBUND
+        groupOrganisations:
+          type: array
+          items:
+            type: string
+        masterDataId:
+          type: string
+    SearchAttributes:
+      type: object
+      properties:
+        name:
+          type: string
+        firstName:
+          type: string
+        allianceName:
+          type: string
+        dateOfBirth:
+          type: string
+        street:
+          type: string
+        houseNumber:
+          type: string
+        zipCode:
+          type: string
+        town:
+          type: string
+        reportingMunicipalityCode:
+          type: string
+        vn:
+          type: string
+        id:
+          type: string
+        evalDate:
+          type: string
+          format: date
+        fullTextSearch:
+          type: string
+        activeOnly:
+          type: boolean
+    AuskunftSearchResponse:
+      type: object
+      properties:
+        result:
+          $ref: '#/components/schemas/PageSearchResult'
+        errors:
+          type: array
+          items:
+            type: string
+    Masked:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/MaskedValueString'
+        - $ref: '#/components/schemas/MaskedValueLong'
+        - $ref: '#/components/schemas/MaskedValueInteger'
+        - $ref: '#/components/schemas/MaskedValueCountry'
+        - $ref: '#/components/schemas/MaskedValueLocalDate'
+        - $ref: '#/components/schemas/MaskedValueSeqInteger'
+        - $ref: '#/components/schemas/MaskedValueBoolean'
+    MaskedDwellingAddressV2:
+      type: object
+      properties:
+        egid:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        ewid:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        householdId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        address:
+          $ref: '#/components/schemas/MaskedSwissAddressInformation'
+        typeOfHouseholdCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        movingDate:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedSwissAddressInformation:
+      type: object
+      properties:
+        addressLine1:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        addressLine2:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        street:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        houseNumber:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dwellingNumber:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        locality:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        town:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCodeAddOn:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCodeId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        country:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedValueBoolean:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueCountry:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueInteger:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueLocalDate:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueLong:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueSeqInteger:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    MaskedValueString:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    PageSearchResult:
+      type: object
+      properties:
+        pageSize:
+          type: integer
+          format: int32
+        totalItems:
+          type: integer
+          format: int32
+        offset:
+          type: integer
+          format: int32
+        totalPages:
+          type: integer
+          format: int32
+        pageNumber:
+          type: integer
+          format: int32
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchResult'
+    SearchResult:
+      type: object
+      properties:
+        perId:
+          type: string
+        sexCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        callName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        name:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        allianceName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dateOfBirth:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        address:
+          $ref: '#/components/schemas/MaskedDwellingAddressV2'
+        reportingMunicipalityCantonAbbreviation:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        reportingMunicipalityName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        residences:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        personStatus:
+          type: integer
+          format: int32
+        personEvalDate:
+          type: string
+          format: date
+        hasLock:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    Value:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/MaskedValueString'
+        - type: object
+          properties:
+            value:
+              type: object
+        - $ref: '#/components/schemas/MaskedValueLong'
+        - $ref: '#/components/schemas/MaskedValueInteger'
+        - $ref: '#/components/schemas/MaskedValueCountry'
+        - $ref: '#/components/schemas/MaskedValueLocalDate'
+        - $ref: '#/components/schemas/MaskedValueSeqInteger'
+        - $ref: '#/components/schemas/MaskedValueBoolean'
+    FullTextSearchAttributes:
+      type: object
+      properties:
+        fullTextSearch:
+          type: string
+        evalDate:
+          type: string
+          format: date
+        activeOnly:
+          type: boolean
+    Child:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Relationship'
+        - type: object
+          properties:
+            care:
+              $ref: '#/components/schemas/MaskedValueBigInteger'
+            parent:
+              type: boolean
+    Marriage:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Relationship'
+        - type: object
+          properties:
+            maritalStatus:
+              oneOf:
+                - $ref: '#/components/schemas/Masked'
+                - $ref: '#/components/schemas/Value'
+            isActive:
+              $ref: '#/components/schemas/MaskedValueBoolean'
+    MaskedAddress:
+      type: object
+      properties:
+        otherAddressCategory:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        maskedMailAddress:
+          $ref: '#/components/schemas/MaskedMailAddress'
+        maskedValidity:
+          $ref: '#/components/schemas/MaskedValidity'
+    MaskedAddressInformation:
+      type: object
+      properties:
+        addressLine1:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        addressLine2:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        street:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        houseNumber:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dwellingNumber:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        postOfficeBoxNumber:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        postOfficeBoxText:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        locality:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        town:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCodeAddOn:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissZipCodeId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        foreignZipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        country:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedAssociatedPerson:
+      type: object
+      properties:
+        vn:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        perId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        personIds:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        officialName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        originalName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        sex:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dateOfBirth:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        hasLock:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedAuskunftResidenceData:
+      type: object
+      properties:
+        residenceData:
+          $ref: '#/components/schemas/MaskedResidenceData'
+        dwellingInformation:
+          $ref: '#/components/schemas/MaskedDwellingInformation'
+    MaskedBirthData:
+      type: object
+      properties:
+        dateOfBirth:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        placeOfBirth:
+          $ref: '#/components/schemas/MaskedGeneralPlace'
+        sexCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        nameOfFather:
+          $ref: '#/components/schemas/MaskedNameOfParent'
+        nameOfMother:
+          $ref: '#/components/schemas/MaskedNameOfParent'
+    MaskedCountry:
+      type: object
+      properties:
+        countryId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        countryIdISO2:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        countryNameShort:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedDeathData:
+      type: object
+      properties:
+        deathPeriodFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        placeOfDeath:
+          $ref: '#/components/schemas/MaskedGeneralPlace'
+        missing:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedDwellingInformation:
+      type: object
+      properties:
+        floor:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        locationOfDwellingOnFloor:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        noOfHabitableRooms:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedExportedMaritalInfo:
+      type: object
+      properties:
+        maritalStatusCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dateOfMaritalStatus:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        cancellationReasonCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        officialProofOfMaritalStatusYesNo:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        separationData:
+          $ref: '#/components/schemas/MaskedSeparationData'
+        placeOfMarriage:
+          $ref: '#/components/schemas/MaskedGeneralPlace'
+    MaskedExportedMaritalRelationshipData:
+      type: object
+      properties:
+        typeOfRelationshipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedExportedMaritalRelationshipDataWithPerson:
+      type: object
+      properties:
+        relationshipData:
+          $ref: '#/components/schemas/MaskedExportedMaritalRelationshipData'
+        partner:
+          $ref: '#/components/schemas/MaskedAssociatedPerson'
+    MaskedFilteredGuardianData:
+      type: object
+      properties:
+        typeOfRelationshipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        guardianRelationshipId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        basedOnLaw:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        basedOnLawAddOn:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        guardianMeasureValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        guardianMeasureValidTo:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        care:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        partnerIdOrganisation:
+          $ref: '#/components/schemas/MaskedPartnerIdOrganisationData'
+        address:
+          $ref: '#/components/schemas/MaskedMailAddress'
+    MaskedFilteredGuardianDataWithPerson:
+      type: object
+      properties:
+        maskedFilteredGuardianData:
+          $ref: '#/components/schemas/MaskedFilteredGuardianData'
+        associatedPerson:
+          $ref: '#/components/schemas/MaskedAssociatedPerson'
+        associatedPersonAddress:
+          $ref: '#/components/schemas/MaskedMailAddress'
+    MaskedFilteredParentalData:
+      type: object
+      properties:
+        typeOfRelationshipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        relationshipValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        careCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedFilteredParentalDataWithPerson:
+      type: object
+      properties:
+        maskedFilteredParentalData:
+          $ref: '#/components/schemas/MaskedFilteredParentalData'
+        associatedPerson:
+          $ref: '#/components/schemas/MaskedAssociatedPerson'
+    MaskedForeignCountry:
+      type: object
+      properties:
+        country:
+          $ref: '#/components/schemas/MaskedCountry'
+        town:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedForeignerName:
+      type: object
+      properties:
+        name:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedGeneralPlace:
+      type: object
+      properties:
+        unknown:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        swissTown:
+          $ref: '#/components/schemas/MaskedSwissMunicipality'
+        foreignCountry:
+          $ref: '#/components/schemas/MaskedForeignCountry'
+    MaskedHealthInsuranceData:
+      type: object
+      properties:
+        healthInsured:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        insurance:
+          $ref: '#/components/schemas/MaskedInsurance'
+        healthInsuranceValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedInsurance:
+      type: object
+      properties:
+        insuranceName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        insuranceAddress:
+          $ref: '#/components/schemas/MaskedInsuranceAddress'
+    MaskedInsuranceAddress:
+      type: object
+      properties:
+        organisation:
+          $ref: '#/components/schemas/MaskedOrganisationMailAddressInfo'
+        addressInformation:
+          $ref: '#/components/schemas/MaskedAddressInformation'
+    MaskedJobData:
+      type: object
+      properties:
+        kindOfEmploymentCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        jobTitle:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        occupationData:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedLock:
+      type: object
+      properties:
+        valueCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        validFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        validTo:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedMailAddress:
+      type: object
+      properties:
+        organisation:
+          $ref: '#/components/schemas/MaskedOrganisationMailAddressInfo'
+        person:
+          $ref: '#/components/schemas/MaskedPersonMailAddressInfo'
+        addressInformation:
+          $ref: '#/components/schemas/MaskedAddressInformation'
+    MaskedNameData:
+      type: object
+      properties:
+        officialName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        originalName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        allianceName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        aliasName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        otherName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        callName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        nameOnForeignPassport:
+          $ref: '#/components/schemas/MaskedForeignerName'
+        declaredForeignName:
+          $ref: '#/components/schemas/MaskedForeignerName'
+        nameValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedNameOfParent:
+      type: object
+      properties:
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        officialName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstNameOnly:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        officialNameOnly:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        officialProofOfNameOfParentsYesNo:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedNationalityData:
+      type: object
+      properties:
+        nationalityStatusCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        country:
+          $ref: '#/components/schemas/MaskedCountry'
+        nationalityValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedNaturalPersonAddonData:
+      type: object
+      properties:
+        mrMrsCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        title:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        languageOfCorrespondance:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedOrganisationMailAddressInfo:
+      type: object
+      properties:
+        organisationName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        organisationNameAddOn1:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        organisationNameAddOn2:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        mrMrsCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        title:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        lastName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedPartnerIdOrganisationData:
+      type: object
+      properties:
+        localPersonId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        otherPersonId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedPersonMailAddressInfo:
+      type: object
+      properties:
+        mrMrsCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        title:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        firstName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        lastName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedPlaceOfOrigin:
+      type: object
+      properties:
+        originName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        canton:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        placeOfOriginId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        historyMunicipalityId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedPlaceOfOriginAddonData:
+      type: object
+      properties:
+        naturalizationDate:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        expatriationDate:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedPlaceOfOriginData:
+      type: object
+      properties:
+        placeOfOrigin:
+          $ref: '#/components/schemas/MaskedPlaceOfOrigin'
+        placeOfOriginAddonData:
+          $ref: '#/components/schemas/MaskedPlaceOfOriginAddonData'
+    MaskedReligion:
+      type: object
+      properties:
+        validFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        religionCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedResidenceData:
+      type: object
+    MaskedResidencePermitData:
+      type: object
+      properties:
+        residencePermitCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        residencePermitValidFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        residencePermitValidTill:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        entryDate:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedSeparationData:
+      type: object
+      properties:
+        separationCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        validFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        validTill:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedSwissMunicipality:
+      type: object
+      properties:
+        municipalityId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        municipalityName:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        cantonAbbreviation:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        historyMunicipalityId:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedValidity:
+      type: object
+      properties:
+        dateFrom:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        dateTo:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+    MaskedValueBigInteger:
+      required:
+        - type
+      type: object
+      properties:
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    NaturalPersonPermissionExportModel:
+      type: object
+      properties:
+        evalDate:
+          type: string
+          format: date
+        vn:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        localPersonId:
+          $ref: '#/components/schemas/NamedPersonId'
+        otherPersonIds:
+          type: array
+          items:
+            $ref: '#/components/schemas/NamedPersonId'
+        naturalPersonAddonData:
+          $ref: '#/components/schemas/MaskedNaturalPersonAddonData'
+        healthInsuranceData:
+          $ref: '#/components/schemas/MaskedHealthInsuranceData'
+        nameData:
+          $ref: '#/components/schemas/MaskedNameData'
+        birthData:
+          $ref: '#/components/schemas/MaskedBirthData'
+        religionData:
+          $ref: '#/components/schemas/MaskedReligion'
+        maritalInfo:
+          $ref: '#/components/schemas/MaskedExportedMaritalInfo'
+        nationalityData:
+          $ref: '#/components/schemas/MaskedNationalityData'
+        politicalRightData:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        deathData:
+          $ref: '#/components/schemas/MaskedDeathData'
+        paperLock:
+          $ref: '#/components/schemas/MaskedLock'
+        dataLock:
+          $ref: '#/components/schemas/MaskedLock'
+        jobData:
+          $ref: '#/components/schemas/MaskedJobData'
+        maritalRelationship:
+          $ref: '#/components/schemas/MaskedExportedMaritalRelationshipDataWithPerson'
+        parentalRelationshipData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedFilteredParentalDataWithPerson'
+        guardianRelationshipData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedFilteredGuardianDataWithPerson'
+        residencePermitData:
+          $ref: '#/components/schemas/MaskedResidencePermitData'
+        addresses:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedAddress'
+        placesOfOrigin:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedPlaceOfOriginData'
+        familyRelations:
+          type: array
+          items:
+            $ref: '#/components/schemas/RelatedPerson'
+        mainResidenceWithDwellingData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedAuskunftResidenceData'
+        secondaryResidenceWithDwellingData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedAuskunftResidenceData'
+        otherResidenceWithDwellingData:
+          type: array
+          items:
+            $ref: '#/components/schemas/MaskedAuskunftResidenceData'
+    Parent:
+      type: object
+      allOf:
+        - $ref: '#/components/schemas/Relationship'
+        - type: object
+          properties:
+            care:
+              $ref: '#/components/schemas/MaskedValueBigInteger'
+            parent:
+              type: boolean
+    RelatedPerson:
+      required:
+        - type
+      type: object
+      properties:
+        relationship:
+          oneOf:
+            - $ref: '#/components/schemas/Child'
+            - $ref: '#/components/schemas/Marriage'
+            - $ref: '#/components/schemas/Parent'
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    Relationship:
+      required:
+        - type
+      type: object
+      properties:
+        typeOfRelationshipCode:
+          oneOf:
+            - $ref: '#/components/schemas/Masked'
+            - $ref: '#/components/schemas/Value'
+        type:
+          type: string
+      discriminator:
+        propertyName: type
+    PermissionResponse:
+      type: object
+      properties:
+        accessToInactiveResidents:
+          type: boolean
+        historicValues:
+          type: boolean
+        searchExport:
+          type: boolean
