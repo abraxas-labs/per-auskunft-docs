@@ -35,13 +35,13 @@ Abraxas runs the bug bounty program with support from Bug Bounty Switzerland AG.
 
 ## Participation Rules
 
-No registration is required for accessing the system and its source code, once disclosed publicly. Please note, that in the current private phase of the program, only invited persons are eligible to register for the program:
+No registration is required for accessing the system and its source code, once disclosed publicly. However, you need to register if you want to participate in the bug bounty program to:
 
 - conduct active security tests on the system
 - get accounts for the system
 - be eligible to get rewards for valid vulnerabilities
 
-You may register for the bug bounty program on the [Bug Bounty Switzerland Platform](https://www.bugbounty.ch/abraxas/).
+You may register for the bug bounty program on the [Bug Bounty Switzerland Platform](https://www.bugbounty.ch/abraxas/). Please note, that in the current private phase of the program, only invited persons are eligible to register for the program.
 
 ## Scope
 
@@ -87,7 +87,7 @@ The Bug Bounty reward grid for this program can be found in the [Bug Bounty Poli
 
 ## Responsible Vulnerability Disclosure
 
-Abraxas will communicate transparently about results and findings as soon as the public release starts on GitHub under [per-personenregister-docs / Security Advisory](https://github.com/abraxas-labs/per-personenregister-docs/security/advisories).
+Abraxas will communicate transparently about results and findings as soon as the public release starts on GitHub under [per-auskunft-docs / Security Advisory](https://github.com/abraxas-labs/per-auskunft-docs/security/advisories).
 
 Everyone who reports a relevant finding will be credited for it in accordance with the terms of the [Bug Bounty Policy](./SECURITY.md#bug-bounty-policy). If you wish, you may remain anonymous. You may also use an alias.
 

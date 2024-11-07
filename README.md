@@ -1,12 +1,12 @@
-# Documentation Repository of PER Personenregister
+# Documentation Repository of PER Auskunft
 
-This repository includes all superordinate documentation for `PER Personenregister` (e.g. architecture documentation, finding list, security policies, etc.)
+This repository includes all superordinate documentation for `PER Auskunft` (e.g. architecture documentation, finding list, security policies, etc.)
 
 ## Index
 
 ### Code of Conduct
 
-This project uses the [Code of Conduct](./CODE_OF_CONDUCT.md) to define expected conduct in our community for PER Personenregister.
+This project uses the [Code of Conduct](./CODE_OF_CONDUCT.md) to define expected conduct in our community for PER Auskunft.
 
 ### Security / Bug Bounty Policy
 
