@@ -1,6 +1,6 @@
 # Security
 
-The projects published in Github based on `PER Auskunft` are made available as part of a private bug bounty program. You must be invited to participate in the program.
+The projects published in Github based on `PER Auskunft` are made available as part of a bug bounty program.
 
 ## Code of Conduct
 
@@ -18,6 +18,7 @@ The System subject to the Program including this bug bounty program has the Abra
 
 - `PER Auskunft` (Frontend)
 - `PER Auskunft API-Gateway` (Backend)
+- `IAM System` (Login)
 
 We will from time to time as considered necessary issue an updated version of this Bug Bounty Policy.
 
@@ -48,7 +49,7 @@ All activities leading to the discovery of a vulnerability:
 
 #### Eligibility Bug Bounty Program
 
-- This is a private program - you must be invited to participate in the program.
+- This is a public bug bounty program – everyone can participate.
 - We reserve the right to terminate the Program at any moment and not accept nor award any new vulnerability reports. This termination will be announced by Abraxas suitable means.
 - You must avoid tests that could cause degradation or interruption of our service (refrain from using automated tools and limit yourself about requests per second).
 - You must not leak, manipulate, or destroy any user data.
@@ -75,7 +76,7 @@ Please make sure to complete your report in accordance with the guidelines set f
 |PER Auskunft|<https://sg.bbt.per.abraxas-apis.ch/api-gateway/*> |API|
 |IAM System|<https://pre.accounts.abraxas.ch/*> |UI|
 
-The source code included in the private bug bounty program can be used for identification of exploitable/demonstrable vulnerabilities.
+The source code included in the bug bounty program can be used for identification of exploitable/demonstrable vulnerabilities.
 
 ### Out-of-Scope and general information
 
@@ -135,6 +136,7 @@ Everything with a real impact on security of `PER Auskunft` – e.g.:
 - For source code findings: Code smell or missing best practices
 - For system or infrastructure: Missing best practices or other guidelines which do not indicate a security issue.
 - Testing for weak credentials of prepared test users in the system
+- Improvements in the area of 3rd party login providers (e.g. Google Auth)
 - Known issues listed on [Exclusions](./Exclusions.pdf)
 - "Self" XSS
 - Missing cookie flags on non-sensitive cookies

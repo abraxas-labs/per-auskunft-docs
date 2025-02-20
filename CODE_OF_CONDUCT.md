@@ -41,7 +41,7 @@ No registration is required for accessing the system and its source code, once d
 - get accounts for the system
 - be eligible to get rewards for valid vulnerabilities
 
-You may register for the bug bounty program on the [Bug Bounty Switzerland Platform](https://www.bugbounty.ch/abraxas/). Please note, that in the current private phase of the program, only invited persons are eligible to register for the program.
+You may register for the bug bounty program on the [Bug Bounty Switzerland Platform](https://www.bugbounty.ch/abraxas/).
 
 ## Scope
 
@@ -91,7 +91,7 @@ Abraxas will communicate transparently about results and findings as soon as the
 
 Everyone who reports a relevant finding will be credited for it in accordance with the terms of the [Bug Bounty Policy](./SECURITY.md#bug-bounty-policy). If you wish, you may remain anonymous. You may also use an alias.
 
-You are free to publish your findings from the public phase only after allowing Abraxas a maximum of 90 days (starting from the day of your submission) to analyze your submission and the opportunity to fix the vulnerability. As soon as we have deeply analysed your report, we will give you an information for publication. A coordination with Abraxas regarding the disclosure after the set period would be appreciated, but is not specifically required.
+You are free to publish your findings after allowing Abraxas a maximum of 90 days (starting from the day of your submission) to analyze your submission and the opportunity to fix the vulnerability. As soon as we have deeply analysed your report, we will give you an information for publication. A coordination with Abraxas regarding the disclosure after the set period would be appreciated, but is not specifically required.
 
 ## License Source Code (Permitted use)
 
