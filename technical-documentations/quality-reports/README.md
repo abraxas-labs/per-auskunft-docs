@@ -4,40 +4,23 @@ The product [SonarQube](https://www.sonarqube.org/) is used for static code anal
 
 The quality profiles used for this are stored in the [sonar-quality-profiles](./sonar-quality-profiles/) directory.
 
-## PER Per-Auskunft-Webapp (Frontend)
+## Quality Report
 
-### Used Quality profiles
-- [CSS - Abraxas Way v1.1](./sonar-quality-profiles/CSS%20Quality%20Profile%20-%20Abraxas%20v1.1.xml)
-- [HTML - Abraxas Way v1.1](./sonar-quality-profiles/HTML%20Quality%20Profile%20-%20Abraxas%20v1.1.xml)
-- [JavaScript - Abraxas Way v1.4](./sonar-quality-profiles/JavaScript%20Quality%20Profile%20-%20Abraxas%20v1.4.xml)
-- [TypeScript - Abraxas Way v1.5](./sonar-quality-profiles/TypeScript%20Quality%20Profile%20-%20Abraxas%20v1.5.xml)
-
-### Version
-v0.40.0
-
-### Quality Report
-![SonarQube Report - PER Per-Auskunft-Webapp](SonarQube%20Report%20-%20PER%20Per-Auskunft-Webapp.PNG)
-
-## PER Personenregister (Backend)
-
-### Used Quality profiles
-- [Java - Personenregister Way v1.1](./sonar-quality-profiles/Java%20Quality%20Profile%20-%20Personenregister%20v1.1.xml)
-- [XML - Abraxas Way v1.2](./sonar-quality-profiles/XML%20Quality%20Profile%20-%20Abraxas%20v1.2.xml)
-
-### Version
-v2.255.0
-
-### Quality Report
-![SonarQube Report - PER Personenregister](SonarQube%20Report%20-%20PER%20Personenregister.PNG)
-
-## PER Apigateway (Backend)
-
-### Used Quality profiles
-- [Java - Personenregister Way v1.1](./sonar-quality-profiles/Java%20Quality%20Profile%20-%20Personenregister%20v1.1.xml)
-- [XML - Abraxas Way v1.2](./sonar-quality-profiles/XML%20Quality%20Profile%20-%20Abraxas%20v1.2.xml)
-
-### Version
-v2.49.1
-
-### Quality Report
-![SonarQube Report - PER Apigateway](SonarQube%20Report%20-%20PER%20Apigateway.PNG)
+| Metric | API Gateway | Auskunft WebApp | Personenregister |
+|---|---|---|---|
+| Type | Backend | Frontend | Backend |
+| Version | v2.81.4 | v1.13.0 | v3.11.0 |
+| Used Quality Profiles | Personenregister v1.1 way (java)<br>Abraxas v1.2 way (xml) | Abraxas v1.1 way (css)<br>Abraxas v1.5 way (js)<br>Abraxas v1.6 way (ts)<br>Abraxas v1.2 way (web) | Personenregister v1.1 way (java)<br>Abraxas v1.2 way (xml) |
+| Quality Gate | Passed | Passed | Passed |
+| Vulnerabilities | 0 | 0 | 0 |
+| Bugs | 0 | 0 | 4 |
+| Code Smells | 48 | 27 | 314 |
+| Accepted Issues | 0 | 0 | 131 |
+| Security Hotspots | 2 | 0 | 0 |
+| Coverage | 0.0% | 0.0% | 0.0% |
+| Duplicated Lines | 66 | 83 | 1751 |
+| Lines to Cover | 1837 | 960 | 30384 |
+| Lines of Code (ncloc) | 5068 | 6592 | 72820 |
+| Maintainability Rating | A | A | A |
+| Reliability Rating | A | A | C |
+| Security Rating | A | A | A |
